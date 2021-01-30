@@ -32,7 +32,7 @@ using namespace daisysp;
  * LED 4 - 
  **********************************************/
 
-class BitCrush : public IEffect
+class Crush : public IEffect
 {
 public:
     void Setup(daisy::DaisySeed *hardware);
@@ -42,7 +42,7 @@ public:
     char *GetEffectName();
 
 private:
-    size_t numChannels;
+    DaisySeed *hw;
     const int LED_MAX_VALUE = 256;
     const int LED_MIN_VALUE = 0;
 

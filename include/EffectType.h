@@ -3,14 +3,14 @@
 
 #include "IEffect.h"
 #include "../lib/Effects/SimpleBypass.h"
-#include "../lib/Effects/BitCrush.h"
+#include "../lib/Effects/Crush.h"
 #include "../lib/Effects/Distortion.h"
 #include "../lib/Effects/Fuzz.h"
 #include "../lib/Effects/Drive.h"
 
 // Effect Objects
 SimpleBypass simpleBypass;
-BitCrush bitCrush;
+Crush bitCrush;
 Distortion distortion;
 Drive overdrive;
 Fuzz fuzz;

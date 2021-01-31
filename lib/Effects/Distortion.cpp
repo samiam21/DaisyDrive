@@ -2,6 +2,8 @@
 
 void Distortion::Setup(daisy::DaisySeed *hardware)
 {
+    hw = hardware;
+
     // Initialize tone control button and LED
     toneOnOffButton.Init(hw->GetPin(effectSPSTPin1));
     toneLed.Init(hw->GetPin(effectLedPin1), false);

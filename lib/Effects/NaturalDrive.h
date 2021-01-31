@@ -1,26 +1,26 @@
-#ifndef DISTORTION_H
-#define DISTORTION_H
+#ifndef NATURALDRIVE_H
+#define NATURALDRIVE_H
 
+#include <math.h>
 #include "daisy_seed.h"
 #include "daisysp.h"
 #include "../../include/IEffect.h"
 #include "../../include/PedalConfig.h"
 #include "../Inputs/Knob.h"
 #include "../Inputs/Button.h"
-#include "../Inputs/NFNToggle.h"
 
 using namespace daisy;
 using namespace daisysp;
 
 /**********************************************
- * Distortion Effect
+ * Overdrive Effect
  * 
- * SPST 1 -
- * SPST 2 -
+ * SPST 1 - Tone Filter On/Off
+ * SPST 2 - 
  * SPST 3 - 
  * SPST 4 - 
  * 
- * SPDT 1 - Clipping Level
+ * SPDT 1 - 
  * SPDT 2 - 
  * 
  * Knob 1 - Boost
@@ -28,13 +28,13 @@ using namespace daisysp;
  * Knob 3 - Tone
  * Knob 4 - 
  * 
- * LED 1 - Tone On/Off
- * LED 2 -
+ * LED 1 - Tone Filter Indicator
+ * LED 2 - 
  * LED 3 - 
  * LED 4 - 
  **********************************************/
 
-class Distortion : public IEffect
+class NaturalDrive : public IEffect
 {
 public:
     void Setup(daisy::DaisySeed *hardware);
@@ -44,25 +44,20 @@ public:
     char *GetEffectName();
 
 private:
-    float WaveShape(float in);
-    void SetClipThreshold();
+    float WaveShape(float in, float k);
 
     DaisySeed *hw;
     float sample_rate;
-    int currentClip = -1;
     const int LED_MAX_VALUE = 256;
     const int LED_MIN_VALUE = 0;
 
     // Effect constants
-    const float boostLevelMin = 45.0f;
-    const float boostLevelMax = 75.0f;
-    const float driveLevelMin = 0.025f;
-    const float driveLevelMax = 0.2f;
+    const float boostLevelMin = 30.0f;
+    const float boostLevelMax = 60.0f;
+    const float driveLevelMin = 25.0f;
+    const float driveLevelMax = 75.0f;
     const float toneLevelMin = -0.35f;
     const float toneLevelMax = 0.35f;
-    const float clipThresholdHigh = 0.1f;
-    const float clipThresholdMid = 0.5f;
-    const float clipThresholdLow = 1.0f;
 
     // Effect parameters
     float boostLevel = 0.0f;
@@ -71,16 +66,13 @@ private:
     bool isToneFilterOn = false;
     float toneFreqHP = 0.0f;
     float toneFreqLP = 0.0f;
-    float hardClipThreshold = 1.0f;
 
     Knob boostLevelKnob;
-    Knob driveKnob;
-    Knob toneKnob;
+    Knob driveLevelKnob;
+    Knob toneLevelKnob;
 
     Button toneOnOffButton;
     Led toneLed;
-
-    NFNToggle clippingToggle;
 
     Tone toneLP;
     ATone toneHP;

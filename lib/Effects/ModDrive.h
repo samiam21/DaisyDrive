@@ -1,5 +1,5 @@
-#ifndef OVERDRIVE_H
-#define OVERDRIVE_H
+#ifndef MODDRIVE_H
+#define MODDRIVE_H
 
 #include <math.h>
 #include "daisy_seed.h"
@@ -13,7 +13,7 @@ using namespace daisy;
 using namespace daisysp;
 
 /**********************************************
- * Overdrive Effect
+ * Modulated Overdrive Effect
  * 
  * SPST 1 - Tone Filter On/Off
  * SPST 2 - 
@@ -34,7 +34,7 @@ using namespace daisysp;
  * LED 4 - 
  **********************************************/
 
-class Drive : public IEffect
+class ModDrive : public IEffect
 {
 public:
     void Setup(daisy::DaisySeed *hardware);
@@ -54,8 +54,8 @@ private:
     // Effect constants
     const float boostLevelMin = 30.0f;
     const float boostLevelMax = 60.0f;
-    const float driveLevelMin = 15.0f;
-    const float driveLevelMax = 40.0f;
+    const float driveLevelMin = 25.0f;
+    const float driveLevelMax = 75.0f;
     const float toneLevelMin = -0.35f;
     const float toneLevelMax = 0.35f;
 

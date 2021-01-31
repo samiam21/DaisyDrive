@@ -1,6 +1,6 @@
-#include "Drive.h"
+#include "NaturalDrive.h"
 
-void Drive::Setup(daisy::DaisySeed *hardware)
+void NaturalDrive::Setup(daisy::DaisySeed *hardware)
 {
     hw = hardware;
 
@@ -22,7 +22,7 @@ void Drive::Setup(daisy::DaisySeed *hardware)
     balance.Init(sample_rate);
 }
 
-void Drive::AudioCallback(float **in, float **out, size_t size)
+void NaturalDrive::AudioCallback(float **in, float **out, size_t size)
 {
     // Set overdrive signal parameters
     float a = sin(((driveLevel + 1) / 101) * (PI_VAL / 2));
@@ -76,14 +76,14 @@ void Drive::AudioCallback(float **in, float **out, size_t size)
     }
 }
 
-void Drive::Cleanup()
+void NaturalDrive::Cleanup()
 {
     // Turn off the LED
     toneLed.Set(0);
     toneLed.Update();
 }
 
-void Drive::Loop()
+void NaturalDrive::Loop()
 {
     // Update the boost level
     if (boostLevelKnob.SetNewValue(boostLevel))
@@ -112,12 +112,12 @@ void Drive::Loop()
     }
 }
 
-char *Drive::GetEffectName()
+char *NaturalDrive::GetEffectName()
 {
-    return (char *)"Overdrive";
+    return (char *)"Natrual Drive";
 }
 
-float Drive::WaveShape(float in, float k)
+float NaturalDrive::WaveShape(float in, float k)
 {
     return (1 + k) * in / (1 + k * abs(in));
 }

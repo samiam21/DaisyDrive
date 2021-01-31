@@ -44,9 +44,8 @@ public:
 
 private:
     float WaveShape(float in, float clipLevel);
-    void ToneOnOff();
 
-    size_t numChannels;
+    DaisySeed *hw;
     float sample_rate;
     const int LED_MAX_VALUE = 256;
     const int LED_MIN_VALUE = 0;
@@ -72,6 +71,7 @@ private:
     Knob toneLevelKnob;
 
     Button toneOnOffButton;
+    Led toneLed;
 
     Tone toneLP;
     ATone toneHP;

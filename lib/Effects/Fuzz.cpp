@@ -2,22 +2,24 @@
 
 void Fuzz::Setup(daisy::DaisySeed *hardware)
 {
-    // // Initialize tone control button and LED
-    // toneOnOffButton.Init(
-    //     effectSPSTPin1, INPUT, [this]() { return ToneOnOff(); }, RISING);
-    // pinMode(effectLedPin1, OUTPUT);
-    // digitalWrite(effectLedPin1, (int)isToneFilterOn);
+    hw = hardware;
 
-    // // Initialize the knobs and effect values
-    // boostLevelKnob.Init(effectPotPin1, INPUT, boostLevel, boostLevelMin, boostLevelMax);
-    // driveLevelKnob.Init(effectPotPin2, INPUT, driveLevel, driveLevelMin, driveLevelMax);
-    // toneLevelKnob.Init(effectPotPin3, INPUT, toneLevel, toneLevelMin, toneLevelMax);
+    // Initialize tone control button and LED
+    toneOnOffButton.Init(hw->GetPin(effectSPSTPin1));
+    toneLed.Init(hw->GetPin(effectLedPin1), false);
+    toneLed.Set(isToneFilterOn ? 1.f : 0);
+    toneLed.Update();
 
-    // // Initialize the filters
-    // sample_rate = DAISY.get_samplerate();
-    // toneHP.Init(sample_rate);
-    // toneLP.Init(sample_rate);
-    // balance.Init(sample_rate);
+    // Initialize the knobs and effect values
+    boostLevelKnob.Init(hw, KNOB_1_CHN, boostLevel, boostLevelMin, boostLevelMax);
+    driveLevelKnob.Init(hw, KNOB_2_CHN, driveLevel, driveLevelMin, driveLevelMax);
+    toneLevelKnob.Init(hw, KNOB_3_CHN, toneLevel, toneLevelMin, toneLevelMax);
+
+    // Initialize the filters
+    sample_rate = hw->AudioSampleRate();
+    toneHP.Init(sample_rate);
+    toneLP.Init(sample_rate);
+    balance.Init(sample_rate);
 }
 
 void Fuzz::AudioCallback(float **in, float **out, size_t size)
@@ -77,31 +79,37 @@ void Fuzz::AudioCallback(float **in, float **out, size_t size)
 void Fuzz::Cleanup()
 {
     // Turn off the LED
-    //digitalWrite(effectLedPin1, LOW);
+    toneLed.Set(0);
+    toneLed.Update();
 }
 
 void Fuzz::Loop()
 {
-    // // Update the boost level
-    // if (boostLevelKnob.SetNewValue(boostLevel))
-    // {
-    //     debugPrint("Updated the boost level to: ");
-    //     debugPrintlnF(boostLevel, 5);
-    // }
+    // Update the boost level
+    if (boostLevelKnob.SetNewValue(boostLevel))
+    {
+        debugPrintlnF(hw, "Updated the boost level to: %f", boostLevel);
+    }
 
-    // // Update the drive level
-    // if (driveLevelKnob.SetNewValue(driveLevel))
-    // {
-    //     debugPrint("Updated the drive level to: ");
-    //     debugPrintlnF(driveLevel, 5);
-    // }
+    // Update the drive level
+    if (driveLevelKnob.SetNewValue(driveLevel))
+    {
+        debugPrintlnF(hw, "Updated the drive level to: %f", driveLevel);
+    }
 
-    // // Update the hard gain level
-    // if (toneLevelKnob.SetNewValue(toneLevel))
-    // {
-    //     debugPrint("Updated the tone level to: ");
-    //     debugPrintlnF(toneLevel, 5);
-    // }
+    // Update the hard gain level
+    if (toneLevelKnob.SetNewValue(toneLevel))
+    {
+        debugPrintlnF(hw, "Updated the tone level to: %f", toneLevel);
+    }
+
+    // Check for the tone on/off
+    if (toneOnOffButton.IsPressed())
+    {
+        isToneFilterOn = !isToneFilterOn;
+        toneLed.Set(isToneFilterOn ? 1.f : 0);
+        toneLed.Update();
+    }
 }
 
 char *Fuzz::GetEffectName()
@@ -116,10 +124,4 @@ float Fuzz::WaveShape(float in, float clipLevel)
     in = in < -clipLevel ? -clipLevel : in;
 
     return in;
-}
-
-void Fuzz::ToneOnOff()
-{
-    isToneFilterOn = !isToneFilterOn;
-    //digitalWrite(effectLedPin1, (int)isToneFilterOn);
 }

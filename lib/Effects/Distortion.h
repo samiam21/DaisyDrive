@@ -28,7 +28,7 @@ using namespace daisysp;
  * Knob 3 - Tone
  * Knob 4 - 
  * 
- * LED 1 -
+ * LED 1 - Tone On/Off
  * LED 2 -
  * LED 3 - 
  * LED 4 - 
@@ -45,10 +45,9 @@ public:
 
 private:
     float WaveShape(float in);
-    void ToneOnOff();
     void SetClipThreshold();
 
-    size_t numChannels;
+    DaisySeed *hw;
     float sample_rate;
     int currentClip = -1;
     const int LED_MAX_VALUE = 256;
@@ -79,6 +78,7 @@ private:
     Knob toneKnob;
 
     Button toneOnOffButton;
+    Led toneLed;
 
     NFNToggle clippingToggle;
 

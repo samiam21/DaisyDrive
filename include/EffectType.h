@@ -3,15 +3,17 @@
 
 #include "IEffect.h"
 #include "../lib/Effects/SimpleBypass.h"
-#include "../lib/Effects/ButtonTest.h"
-#include "../lib/Effects/KnobTest.h"
-#include "../lib/Effects/ToggleTest.h"
+#include "../lib/Effects/Crush.h"
+#include "../lib/Effects/Distortion.h"
+#include "../lib/Effects/Fuzz.h"
+#include "../lib/Effects/Drive.h"
 
 // Effect Objects
 SimpleBypass simpleBypass;
-ButtonTest buttonTest;
-KnobTest knobTest;
-ToggleTest toggleTest;
+Crush bitCrush;
+Distortion distortion;
+Drive overdrive;
+Fuzz fuzz;
 
 /**
  * The rotary encoder is using Gray code, not standard hex.
@@ -20,11 +22,12 @@ ToggleTest toggleTest;
  */
 enum EffectType
 {
-    SIMPLEBYPASS = 0,
-    BUTTONTEST = 1,
-    KNOBTEST = 3,
-    TOGGLETEST = 2,
+    BITCRUSH = 0,
+    OVERDRIVE = 1,
+    DISTORTION = 3,
+    FUZZ = 2,
 
+    SIMPLEBYPASS = 8,
     UNSET = 99
 };
 
@@ -35,12 +38,14 @@ extern IEffect *GetEffectObject(EffectType type)
 {
     switch (type)
     {
-    case BUTTONTEST:
-        return (IEffect *)&buttonTest;
-    case KNOBTEST:
-        return (IEffect *)&knobTest;
-    case TOGGLETEST:
-        return (IEffect *)&toggleTest;
+    case FUZZ:
+        return (IEffect *)&fuzz;
+    case OVERDRIVE:
+        return (IEffect *)&overdrive;
+    case DISTORTION:
+        return (IEffect *)&distortion;
+    case BITCRUSH:
+        return (IEffect *)&bitCrush;
     case SIMPLEBYPASS:
     case UNSET:
     default:

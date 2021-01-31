@@ -54,8 +54,8 @@ private:
     const int LED_MIN_VALUE = 0;
 
     // Effect constants
-    const float boostLevelMin = 45.0f;
-    const float boostLevelMax = 75.0f;
+    const float boostLevelMin = 15.0f;
+    const float boostLevelMax = 35.0f;
     const float driveLevelMin = 0.025f;
     const float driveLevelMax = 0.2f;
     const float toneLevelMin = -0.35f;

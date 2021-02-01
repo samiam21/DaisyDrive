@@ -15,8 +15,8 @@ using namespace daisysp;
 /**********************************************
  * Distortion Effect
  * 
- * SPST 1 -
- * SPST 2 -
+ * SPST 1 - Tone On/Off
+ * SPST 2 - Bypass
  * SPST 3 - 
  * SPST 4 - 
  * 
@@ -29,7 +29,7 @@ using namespace daisysp;
  * Knob 4 - 
  * 
  * LED 1 - Tone On/Off
- * LED 2 -
+ * LED 2 - Bypass
  * LED 3 - 
  * LED 4 - 
  **********************************************/
@@ -68,17 +68,20 @@ private:
     float boostLevel = 0.0f;
     float driveLevel = 0.0f;
     float toneLevel = 0.0f;
-    bool isToneFilterOn = false;
     float toneFreqHP = 0.0f;
     float toneFreqLP = 0.0f;
     float hardClipThreshold = 1.0f;
+    bool isToneFilterOn = false;
+    bool isBypass = false;
 
     Knob boostLevelKnob;
     Knob driveKnob;
     Knob toneKnob;
 
     Button toneOnOffButton;
+    Button bypassButton;
     Led toneLed;
+    Led bypassLed;
 
     NFNToggle clippingToggle;
 

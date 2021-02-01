@@ -10,6 +10,12 @@ void Distortion::Setup(daisy::DaisySeed *hardware)
     toneLed.Set(isToneFilterOn ? 1.f : 0);
     toneLed.Update();
 
+    // Initialize bypass button and LED
+    bypassButton.Init(hw->GetPin(effectSPSTPin2));
+    bypassLed.Init(hw->GetPin(effectLedPin2), false);
+    bypassLed.Set(isBypass ? 0 : 1.f);
+    bypassLed.Update();
+
     // Initialize the clipping toggle
     clippingToggle.Init(hw->GetPin(effectSPDT1Pin1), hw->GetPin(effectSPDT1Pin2));
     SetClipThreshold();
@@ -59,23 +65,32 @@ void Distortion::AudioCallback(float **in, float **out, size_t size)
         dry = in[AUDIO_IN_CH][i];
         dry *= boostLevel;
 
-        // Shape the wet waveform
-        wet = dry * gain;
-        wet = WaveShape(wet);
-
-        // Output the signal with or without tone control
-        if (isToneFilterOn)
+        // Check for bypass
+        if (isBypass)
         {
-            // Apply the filters
-            wet = toneHP.Process(wet);
-            wet = toneLP.Process(wet);
+            // Send the output signal
+            out[AUDIO_OUT_CH][i] = dry;
         }
+        else
+        {
+            // Shape the wet waveform
+            wet = dry * gain;
+            wet = WaveShape(wet);
 
-        // Balance the output to account for volume loss in processing
-        wet = balance.Process(wet, dry);
+            // Output the signal with or without tone control
+            if (isToneFilterOn)
+            {
+                // Apply the filters
+                wet = toneHP.Process(wet);
+                wet = toneLP.Process(wet);
+            }
 
-        // Send the output signal
-        out[AUDIO_OUT_CH][i] = wet;
+            // Balance the output to account for volume loss in processing
+            wet = balance.Process(wet, dry);
+
+            // Send the output signal
+            out[AUDIO_OUT_CH][i] = wet;
+        }
     }
 }
 
@@ -84,6 +99,8 @@ void Distortion::Cleanup()
     // Turn off the LED
     toneLed.Set(0);
     toneLed.Update();
+    bypassLed.Set(0);
+    bypassLed.Update();
 }
 
 void Distortion::Loop()
@@ -112,6 +129,14 @@ void Distortion::Loop()
         isToneFilterOn = !isToneFilterOn;
         toneLed.Set(isToneFilterOn ? 1.f : 0);
         toneLed.Update();
+    }
+
+    // Check for the bypass
+    if (bypassButton.IsPressed())
+    {
+        isBypass = !isBypass;
+        bypassLed.Set(isBypass ? 0 : 1.f);
+        bypassLed.Update();
     }
 
     // Update the clipping threshold

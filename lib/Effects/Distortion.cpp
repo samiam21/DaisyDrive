@@ -4,111 +4,87 @@ void Distortion::Setup(daisy::DaisySeed *hardware)
 {
     hw = hardware;
 
-    // Initialize tone control button and LED
-    toneOnOffButton.Init(hw->GetPin(effectSPSTPin1));
-    toneLed.Init(hw->GetPin(effectLedPin1), false);
-    toneLed.Set(isToneFilterOn ? 1.f : 0);
-    toneLed.Update();
-
-    // Initialize bypass button and LED
-    bypassButton.Init(hw->GetPin(effectSPSTPin2));
-    bypassLed.Init(hw->GetPin(effectLedPin2), false);
-    bypassLed.Set(isBypass ? 0 : 1.f);
-    bypassLed.Update();
+    // Initialize soft on off button and LED
+    giveItButton.Init(hw->GetPin(effectSPSTPin1));
+    giveItLed.Init(hw->GetPin(effectLedPin1), false);
+    giveItLed.Set(giveItAllShesGot ? 1.f : 0);
+    giveItLed.Update();
 
     // Initialize the clipping toggle
     clippingToggle.Init(hw->GetPin(effectSPDT1Pin1), hw->GetPin(effectSPDT1Pin2));
     SetClipThreshold();
 
     // Initialize the knobs and effect values
-    boostLevelKnob.Init(hw, KNOB_1_CHN, boostLevel, boostLevelMin, boostLevelMax);
-    driveKnob.Init(hw, KNOB_2_CHN, driveLevel, driveLevelMin, driveLevelMax);
-    toneKnob.Init(hw, KNOB_3_CHN, toneLevel, toneLevelMin, toneLevelMax);
+    pregainKnob.Init(hw, KNOB_1_CHN, pregainLevel, pregainLevelMin, pregainLevelMax);
+    gainKnob.Init(hw, KNOB_2_CHN, gainLevel, gainLevelMin, gainLevelMax);
+    driveKnob.Init(hw, KNOB_3_CHN, driveLevel, driveLevelMin, driveLevelMax);
+    mixKnob.Init(hw, KNOB_4_CHN, mixLevel);
 
-    // Initialize the filters
+    // Initialize the balancer
     sample_rate = hw->AudioSampleRate();
-    toneHP.Init(sample_rate);
-    toneLP.Init(sample_rate);
     balance.Init(sample_rate);
 }
 
 void Distortion::AudioCallback(float **in, float **out, size_t size)
 {
-    float gain = driveLevel * 100 + 1.2;
-
-    if (isToneFilterOn)
-    {
-        // Set the filter frequencies
-        if (toneLevel < 0.0f)
-        {
-            // Left half of pot HP off, LP on
-            toneFreqHP = 0;
-            toneFreqLP = 5000.0f * (powf(10, 2 * toneLevel)) + 100.f; //This is a more complex function just to make the taper nice and smooth, the filter turned on too fast when linear
-        }
-        else
-        {
-            // Right half of pot HP on, LP off
-            toneFreqHP = 5000.0f * powf(10, 2.f * toneLevel - 2); //This is a more complex function just to make the taper nice and smooth, the filter turned on too fast when linear
-            toneFreqLP = 1000000.0f;                              // just something very high so the filter is not killing any actual guitar sound
-        }
-
-        // Update tone filters
-        toneHP.SetFreq(toneFreqHP);
-        toneLP.SetFreq(toneFreqLP);
-    }
+    // Set overdrive signal parameters
+    float a = sin(((driveLevel + 1) / 101) * (PI_VAL / 2));
+    float k = (2 * a) / (1 - a);
 
     for (size_t i = 0; i < size; i++)
     {
         float wet, dry;
 
-        // Adjust input signal by the gain
+        // Adjust input signal by the pregain
         dry = in[AUDIO_IN_CH][i];
-        dry *= boostLevel;
+        dry *= pregainLevel;
 
-        // Check for bypass
-        if (isBypass)
+        // Adjust the wet signal by the gain
+        wet = dry;
+        wet *= gainLevel;
+
+        // Wave shape the wet signal
+        wet = WaveShape(wet, k);
+
+        // Apply the hard clipping if it is enabled
+        if (giveItAllShesGot)
         {
-            // Send the output signal
-            out[AUDIO_OUT_CH][i] = dry;
+            wet = HardClip(wet);
         }
-        else
-        {
-            // Shape the wet waveform
-            wet = dry * gain;
-            wet = WaveShape(wet);
 
-            // Output the signal with or without tone control
-            if (isToneFilterOn)
-            {
-                // Apply the filters
-                wet = toneHP.Process(wet);
-                wet = toneLP.Process(wet);
-            }
+        // Balance the output to account for volume gain in processing
+        wet = balance.Process(wet, dry);
 
-            // Balance the output to account for volume loss in processing
-            wet = balance.Process(wet, dry);
-
-            // Send the output signal
-            out[AUDIO_OUT_CH][i] = wet;
-        }
+        // Send the output signal, mixed wet with dry
+        out[AUDIO_OUT_CH][i] = wet * mixLevel + dry * (1 - mixLevel);
     }
 }
 
 void Distortion::Cleanup()
 {
     // Turn off the LED
-    toneLed.Set(0);
-    toneLed.Update();
-    bypassLed.Set(0);
-    bypassLed.Update();
+    giveItLed.Set(0);
+    giveItLed.Update();
 }
 
 void Distortion::Loop()
 {
-    // Update the boost level
-    if (boostLevelKnob.SetNewValue(boostLevel))
+    // Update the pregain level
+    if (pregainKnob.SetNewValue(pregainLevel))
     {
-        debugPrintlnF(hw, "Updated the boost level to: %f", boostLevel);
+        debugPrintlnF(hw, "Updated the pregain level to: %f", pregainLevel);
+    }
+
+    // Update the gain level
+    if (gainKnob.SetNewValue(gainLevel))
+    {
+        debugPrintlnF(hw, "Updated the gain level to: %f", gainLevel);
+    }
+
+    // Update the mix level
+    if (mixKnob.SetNewValue(mixLevel))
+    {
+        debugPrintlnF(hw, "Updated the mix level to: %f", mixLevel);
     }
 
     // Update the drive level
@@ -117,26 +93,14 @@ void Distortion::Loop()
         debugPrintlnF(hw, "Updated the drive level to: %f", driveLevel);
     }
 
-    // Update the tone level
-    if (toneKnob.SetNewValue(toneLevel))
+    // Check for the give it all she's got on/off
+    if (giveItButton.IsPressed())
     {
-        debugPrintlnF(hw, "Updated the tone level to: %f", toneLevel);
-    }
+        giveItAllShesGot = !giveItAllShesGot;
+        giveItLed.Set(giveItAllShesGot ? 1.f : 0);
+        giveItLed.Update();
 
-    // Check for the tone on/off
-    if (toneOnOffButton.IsPressed())
-    {
-        isToneFilterOn = !isToneFilterOn;
-        toneLed.Set(isToneFilterOn ? 1.f : 0);
-        toneLed.Update();
-    }
-
-    // Check for the bypass
-    if (bypassButton.IsPressed())
-    {
-        isBypass = !isBypass;
-        bypassLed.Set(isBypass ? 0 : 1.f);
-        bypassLed.Update();
+        debugPrintlnF(hw, "Give it all she's got!: %s", (giveItAllShesGot) ? "ON" : "OFF");
     }
 
     // Update the clipping threshold
@@ -148,22 +112,15 @@ char *Distortion::GetEffectName()
     return (char *)"Distortion";
 }
 
-float Distortion::WaveShape(float in)
+float Distortion::WaveShape(float in, float k)
 {
-    // Soft clip
-    if (in > 0)
-    {
-        in = 1 - expf(-in);
-    }
-    else
-    {
-        in = -1 + expf(in);
-    }
+    return (1 + k) * in / (1 + k * abs(in));
+}
 
-    // Hard clip
+float Distortion::HardClip(float in)
+{
     in = in > hardClipThreshold ? hardClipThreshold : in;
     in = in < -hardClipThreshold ? -hardClipThreshold : in;
-
     return in;
 }
 

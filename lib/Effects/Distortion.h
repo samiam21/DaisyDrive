@@ -15,21 +15,21 @@ using namespace daisysp;
 /**********************************************
  * Distortion Effect
  * 
- * SPST 1 - Tone On/Off
- * SPST 2 - Bypass
+ * SPST 1 - Give it all she's got!
+ * SPST 2 - 
  * SPST 3 - 
  * SPST 4 - 
  * 
  * SPDT 1 - Clipping Level
  * SPDT 2 - 
  * 
- * Knob 1 - Boost
- * Knob 2 - Drive
- * Knob 3 - Tone
- * Knob 4 - 
+ * Knob 1 - Pregain
+ * Knob 2 - Gain
+ * Knob 3 - Drive
+ * Knob 4 - Mix
  * 
- * LED 1 - Tone On/Off
- * LED 2 - Bypass
+ * LED 1 - Give it all she's got!
+ * LED 2 - 
  * LED 3 - 
  * LED 4 - 
  **********************************************/
@@ -44,7 +44,8 @@ public:
     char *GetEffectName();
 
 private:
-    float WaveShape(float in);
+    float WaveShape(float in, float k);
+    float HardClip(float in);
     void SetClipThreshold();
 
     DaisySeed *hw;
@@ -54,39 +55,34 @@ private:
     const int LED_MIN_VALUE = 0;
 
     // Effect constants
-    const float boostLevelMin = 15.0f;
-    const float boostLevelMax = 35.0f;
-    const float driveLevelMin = 0.025f;
-    const float driveLevelMax = 0.2f;
-    const float toneLevelMin = -0.35f;
-    const float toneLevelMax = 0.35f;
+    const float pregainLevelMin = 1.2f;
+    const float pregainLevelMax = 11.2f;
+    const float gainLevelMin = 1.2f;
+    const float gainLevelMax = 101.2f;
+    const float driveLevelMin = 1.0f;
+    const float driveLevelMax = 25.0f;
     const float clipThresholdHigh = 0.1f;
-    const float clipThresholdMid = 0.5f;
-    const float clipThresholdLow = 1.0f;
+    const float clipThresholdMid = 2.0f;
+    const float clipThresholdLow = 5.0f;
 
     // Effect parameters
-    float boostLevel = 0.0f;
-    float driveLevel = 0.0f;
-    float toneLevel = 0.0f;
-    float toneFreqHP = 0.0f;
-    float toneFreqLP = 0.0f;
+    float pregainLevel = 0.0f;
+    float gainLevel = 0.0f;
+    float mixLevel = 0.0f;
+    float driveLevel = 1.0f;
     float hardClipThreshold = 1.0f;
-    bool isToneFilterOn = false;
-    bool isBypass = false;
+    bool giveItAllShesGot = false;
 
-    Knob boostLevelKnob;
+    Knob pregainKnob;
+    Knob gainKnob;
+    Knob mixKnob;
     Knob driveKnob;
-    Knob toneKnob;
 
-    Button toneOnOffButton;
-    Button bypassButton;
-    Led toneLed;
-    Led bypassLed;
+    Button giveItButton;
+    Led giveItLed;
 
     NFNToggle clippingToggle;
 
-    Tone toneLP;
-    ATone toneHP;
     Balance balance;
 };
 

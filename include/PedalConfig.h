@@ -5,7 +5,7 @@
 
 #define DEBUG 1
 
-#define WAIT_FOR_SERIAL true
+#define WAIT_FOR_SERIAL false
 
 #define BLOCKSIZE 1
 #define DAISY_SAMPLE_RATE daisy::SaiHandle::Config::SampleRate::SAI_96KHZ
@@ -19,7 +19,7 @@
 #define KNOB_4_CHN 3
 
 // NOTE: If you bypass the selector, make sure the selectedEffectType in main.cpp is set to the desired effect
-// #define BYPASS_SELECTOR // Bypasses the effect selector
+#define BYPASS_SELECTOR // Bypasses the effect selector
 
 #define initDebugPrint(hw, pcBlock)                                                                    \
     {                                                                                                  \

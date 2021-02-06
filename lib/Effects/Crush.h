@@ -47,8 +47,8 @@ private:
     const int LED_MIN_VALUE = 0;
 
     // Effect constants
-    const float boostLevelMin = 30.0f;
-    const float boostLevelMax = 60.0f;
+    const float boostLevelMin = 1.0f;
+    const float boostLevelMax = 10.0f;
     const float bitcrushMaxValue = 0.75f;
     const float bitcrushMinValue = 0.25f;
 

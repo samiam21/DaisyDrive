@@ -6,14 +6,16 @@
 #include "../lib/Effects/Crush.h"
 #include "../lib/Effects/Distortion.h"
 #include "../lib/Effects/Fuzz.h"
-#include "../lib/Effects/Drive.h"
+#include "../lib/Effects/ModDrive.h"
+#include "../lib/Effects/NaturalDrive.h"
 
 // Effect Objects
 SimpleBypass simpleBypass;
 Crush bitCrush;
 Distortion distortion;
-Drive overdrive;
+ModDrive modDrive;
 Fuzz fuzz;
+NaturalDrive naturalDrive;
 
 /**
  * The rotary encoder is using Gray code, not standard hex.
@@ -23,9 +25,10 @@ Fuzz fuzz;
 enum EffectType
 {
     BITCRUSH = 0,
-    OVERDRIVE = 1,
-    DISTORTION = 3,
-    FUZZ = 2,
+    MODDRIVE = 1,
+    NATURALDRIVE = 3,
+    DISTORTION = 2,
+    FUZZ = 6,
 
     SIMPLEBYPASS = 8,
     UNSET = 99
@@ -40,8 +43,10 @@ extern IEffect *GetEffectObject(EffectType type)
     {
     case FUZZ:
         return (IEffect *)&fuzz;
-    case OVERDRIVE:
-        return (IEffect *)&overdrive;
+    case MODDRIVE:
+        return (IEffect *)&modDrive;
+    case NATURALDRIVE:
+        return (IEffect *)&naturalDrive;
     case DISTORTION:
         return (IEffect *)&distortion;
     case BITCRUSH:

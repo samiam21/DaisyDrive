@@ -1,6 +1,7 @@
-#ifndef FUZZ_H
-#define FUZZ_H
+#ifndef NATURALDRIVE_H
+#define NATURALDRIVE_H
 
+#include <math.h>
 #include "daisy_seed.h"
 #include "daisysp.h"
 #include "../../include/IEffect.h"
@@ -12,7 +13,7 @@ using namespace daisy;
 using namespace daisysp;
 
 /**********************************************
- * Fuzz Effect
+ * Overdrive Effect
  * 
  * SPST 1 - Tone Filter On/Off
  * SPST 2 - 
@@ -33,7 +34,7 @@ using namespace daisysp;
  * LED 4 - 
  **********************************************/
 
-class Fuzz : public IEffect
+class NaturalDrive : public IEffect
 {
 public:
     void Setup(daisy::DaisySeed *hardware);
@@ -43,7 +44,7 @@ public:
     char *GetEffectName();
 
 private:
-    float WaveShape(float in, float clipLevel);
+    float WaveShape(float in, float k);
 
     DaisySeed *hw;
     float sample_rate;
@@ -51,10 +52,10 @@ private:
     const int LED_MIN_VALUE = 0;
 
     // Effect constants
-    const float boostLevelMin = 1.0f;
-    const float boostLevelMax = 10.0f;
-    const float driveLevelMin = -0.03f;
-    const float driveLevelMax = 0.0005f;
+    const float boostLevelMin = 15.0f;
+    const float boostLevelMax = 30.0f;
+    const float driveLevelMin = 25.0f;
+    const float driveLevelMax = 75.0f;
     const float toneLevelMin = -0.35f;
     const float toneLevelMax = 0.35f;
 
